@@ -6,6 +6,12 @@ let defaultStyle = {
   color: defaultTextColor,
 }
 
+let fakeServerData = {
+  user: {
+    name: 'Pete'
+  }
+};
+
 class Aggregate extends Component {
   render() {
     return (
@@ -44,10 +50,21 @@ class PlaylistItem extends Component {
 }
 
 class App extends Component {
+
+  state = {};
+
+  componentDidMount() {
+    this.setState({
+      serverData: fakeServerData
+    })
+  }
+
   render() {
     return (
       <div className="App">
-        <h1 style={defaultStyle}>Title</h1>
+        {
+          this.state.serverData ? <h1 style={defaultStyle}>{this.state.serverData.user.name}'s Playlists</h1> : null
+        }
         <Aggregate></Aggregate>
         <Aggregate></Aggregate>
         <Filter/>
