@@ -1,22 +1,18 @@
 import React, { Component } from 'react';
 import './App.css';
 
+import fakeServerData from './fakeServerData';
+
 const defaultTextColor = '#fff';
 let defaultStyle = {
   color: defaultTextColor,
 }
 
-let fakeServerData = {
-  user: {
-    name: 'Pete'
-  }
-};
-
 class Aggregate extends Component {
   render() {
     return (
       <div style={{ ...defaultStyle, width: '40%', display: 'inline-block' }}>
-        <h2>Number Text</h2>
+        <h2>{this.props.count} {this.props.type}</h2>
       </div>
     )
   }
@@ -54,24 +50,38 @@ class App extends Component {
   state = {};
 
   componentDidMount() {
-    this.setState({
-      serverData: fakeServerData
-    })
+    setTimeout(() => {
+      this.setState({
+        serverData: fakeServerData
+      })
+    }, 1000)
   }
 
   render() {
+
+    const totalDurationInSeconds = this.state.serverData && this.state.serverData.user.playlists.reduce((totalTime, playlist) => {
+      playlist.songs.forEach(song => totalTime += song.duration);
+      return totalTime
+    }, 0)
+
+    const totalDurationInHours = Math.round(totalDurationInSeconds / 360);
+
     return (
       <div className="App">
         {
-          this.state.serverData ? <h1 style={defaultStyle}>{this.state.serverData.user.name}'s Playlists</h1> : null
+          this.state.serverData ? (
+            <div>
+              <h1 style={defaultStyle}>{this.state.serverData.user.name}'s Playlists</h1>
+              <Aggregate count={this.state.serverData.user.playlists.length} type="playlists"></Aggregate>
+              <Aggregate count={totalDurationInHours} type="hours"></Aggregate>
+              <Filter/>
+              <PlaylistItem/>
+              <PlaylistItem/>
+              <PlaylistItem/>
+              <PlaylistItem/>
+            </div>
+          ) : <h1 style={defaultStyle}>Loading...</h1>
         }
-        <Aggregate></Aggregate>
-        <Aggregate></Aggregate>
-        <Filter/>
-        <PlaylistItem/>
-        <PlaylistItem/>
-        <PlaylistItem/>
-        <PlaylistItem/>
       </div>
     );
   }
