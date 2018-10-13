@@ -30,3 +30,8 @@
     transform: rotate(360deg);
   }
 }
+
+h1 {
+  font-size: 54px;
+  color: blue;
+}
