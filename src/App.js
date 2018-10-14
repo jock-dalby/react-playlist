@@ -58,13 +58,17 @@ class App extends Component {
 
   render() {
 
-    const totalDurationInSeconds = this.state.serverData && this.state.serverData.user.playlists.reduce((totalTime, playlist) => {
+    const serverData = this.state.serverData;
+    const filteredPlaylists = serverData && serverData.user.playlists.filter(playlist => {
+      return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
+    });
+
+    const totalDurationInSeconds = filteredPlaylists && filteredPlaylists.reduce((totalTime, playlist) => {
       playlist.songs.forEach(song => totalTime += song.duration);
       return totalTime
     }, 0)
 
     const totalDurationInHours = Math.round(totalDurationInSeconds / 360);
-    const serverData = this.state.serverData;
 
     return (
       <div className="App">
@@ -72,13 +76,11 @@ class App extends Component {
           serverData ? (
             <div>
               <h1 style={defaultStyle}>{serverData.user.name}'s Playlists</h1>
-              <Aggregate count={serverData.user.playlists.length} type="playlists"></Aggregate>
+              <Aggregate count={filteredPlaylists.length} type="playlists"></Aggregate>
               <Aggregate count={totalDurationInHours} type="hours"></Aggregate>
               <Filter filterString={this.state.filterString} onChangeHandler={filterString => this.setState({filterString})}/>
               {
-                serverData.user.playlists.filter(playlist => {
-                  return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
-                }).map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
+                filteredPlaylists.map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
               }
             </div>
           ) : <h1 style={defaultStyle}>Loading...</h1>
