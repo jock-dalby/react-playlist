@@ -59,11 +59,11 @@ class App extends Component {
   render() {
 
     const serverData = this.state.serverData;
-    const filteredPlaylists = serverData && serverData.user.playlists.filter(playlist => {
+    const filteredPlaylists = !serverData ? [] : serverData.user.playlists.filter(playlist => {
       return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
     });
 
-    const totalDurationInSeconds = filteredPlaylists && filteredPlaylists.reduce((totalTime, playlist) => {
+    const totalDurationInSeconds = filteredPlaylists.reduce((totalTime, playlist) => {
       playlist.songs.forEach(song => totalTime += song.duration);
       return totalTime
     }, 0)
