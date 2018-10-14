@@ -77,7 +77,7 @@ class App extends Component {
               <Filter filterString={this.state.filterString} onChangeHandler={filterString => this.setState({filterString})}/>
               {
                 serverData.user.playlists.filter(playlist => {
-                  return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+                  return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
                 }).map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
               }
             </div>
