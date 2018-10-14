@@ -23,7 +23,7 @@ class Filter extends Component {
     return (
       <div>
         <img />
-        <input type="text"/>
+        <input type="text" value={this.props.filterString} onChange={e => this.props.onChangeHandler(e.target.value)}/>
       </div>
     );
   }
@@ -34,9 +34,9 @@ class PlaylistItem extends Component {
     return (
       <div style={{ ...defaultStyle, display: 'inline-block', width: '25%' }}>
         <img />
-        <h3>{this.props.playlist.playlistName}</h3>
+        <h3>{this.props.playlist.name}</h3>
         <ul>
-          {this.props.playlist.songs.map(song => <li>{song.name}</li>)}
+          {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)}
         </ul>
       </div>
     );
@@ -50,7 +50,8 @@ class App extends Component {
   componentDidMount() {
     setTimeout(() => {
       this.setState({
-        serverData: fakeServerData
+        serverData: fakeServerData,
+        filterString: 'favourittes'
       })
     }, 1000)
   }
@@ -73,8 +74,12 @@ class App extends Component {
               <h1 style={defaultStyle}>{serverData.user.name}'s Playlists</h1>
               <Aggregate count={serverData.user.playlists.length} type="playlists"></Aggregate>
               <Aggregate count={totalDurationInHours} type="hours"></Aggregate>
-              <Filter/>
-              {serverData.user.playlists.map(playlist => <PlaylistItem playlist={playlist}/>)}
+              <Filter filterString={this.state.filterString} onChangeHandler={filterString => this.setState({filterString})}/>
+              {
+                serverData.user.playlists.filter(playlist => {
+                  return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+                }).map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
+              }
             </div>
           ) : <h1 style={defaultStyle}>Loading...</h1>
         }
