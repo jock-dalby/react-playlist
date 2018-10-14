@@ -34,11 +34,9 @@ class PlaylistItem extends Component {
     return (
       <div style={{ ...defaultStyle, display: 'inline-block', width: '25%' }}>
         <img />
-        <h3>Playlist name</h3>
+        <h3>{this.props.playlist.playlistName}</h3>
         <ul>
-          <li>Song 1</li>
-          <li>Song 2</li>
-          <li>Song 3</li>
+          {this.props.playlist.songs.map(song => <li>{song.name}</li>)}
         </ul>
       </div>
     );
@@ -65,20 +63,18 @@ class App extends Component {
     }, 0)
 
     const totalDurationInHours = Math.round(totalDurationInSeconds / 360);
+    const serverData = this.state.serverData;
 
     return (
       <div className="App">
         {
-          this.state.serverData ? (
+          serverData ? (
             <div>
-              <h1 style={defaultStyle}>{this.state.serverData.user.name}'s Playlists</h1>
-              <Aggregate count={this.state.serverData.user.playlists.length} type="playlists"></Aggregate>
+              <h1 style={defaultStyle}>{serverData.user.name}'s Playlists</h1>
+              <Aggregate count={serverData.user.playlists.length} type="playlists"></Aggregate>
               <Aggregate count={totalDurationInHours} type="hours"></Aggregate>
               <Filter/>
-              <PlaylistItem/>
-              <PlaylistItem/>
-              <PlaylistItem/>
-              <PlaylistItem/>
+              {serverData.user.playlists.map(playlist => <PlaylistItem playlist={playlist}/>)}
             </div>
           ) : <h1 style={defaultStyle}>Loading...</h1>
         }
