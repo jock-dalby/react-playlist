@@ -36,7 +36,7 @@ class PlaylistItem extends Component {
         <img />
         <h3>{this.props.playlist.name}</h3>
         <ul>
-          {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)}
+          {/* {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)} */}
         </ul>
       </div>
     );
@@ -45,7 +45,15 @@ class PlaylistItem extends Component {
 
 class App extends Component {
 
-  state = {};
+  state = {
+    serverData: {
+      user: {
+        name: '',
+        playlists: []
+      }
+    },
+    filterString: ''
+  };
 
   componentDidMount() {
     let parsed = queryString.parse(window.location.search);
@@ -57,23 +65,42 @@ class App extends Component {
     .then(response => response.json())
     .then(data => this.setState({
       serverData: {
+        ...this.state.serverData,
         user: {
+          ...this.state.serverData.user,
           name: data.display_name,
-          playlists: []
         },
       }
     }))
+
+    fetch('https://api.spotify.com/v1/me/playlists', {
+      headers: { 'Authorization': `Bearer ${accessToken}`}
+    })
+    .then(response => response.json())
+    .then(data => this.setState({
+      serverData: {
+        ...this.state.serverData,
+        user: {
+          ...this.state.serverData.user,
+          playlists: data.items,
+        },
+      }
+    }))
+    setTimeout(() => {
+      console.log(this.state)
+    }, 100)
   }
 
   render() {
 
     const serverData = this.state.serverData;
-    const filteredPlaylists = !serverData ? [] : serverData.user.playlists.filter(playlist => {
+    console.log('dddd', this.state.serverData.user.playlists)
+    const filteredPlaylists = this.state.serverData.user.playlists.filter(playlist => {
       return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
     });
 
     const totalDurationInSeconds = filteredPlaylists.reduce((totalTime, playlist) => {
-      playlist.songs.forEach(song => totalTime += song.duration);
+      // playlist.songs.forEach(song => totalTime += song.duration);
       return totalTime
     }, 0)
 
