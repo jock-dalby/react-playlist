@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import fakeServerData from './fakeServerData';
+import queryString from 'query-string';
 
 const defaultTextColor = '#fff';
 let defaultStyle = {
@@ -48,12 +48,21 @@ class App extends Component {
   state = {};
 
   componentDidMount() {
-    setTimeout(() => {
-      this.setState({
-        serverData: fakeServerData,
-        filterString: ''
-      })
-    }, 1000)
+    let parsed = queryString.parse(window.location.search);
+    let accessToken = parsed.access_token;
+
+    fetch('https://api.spotify.com/v1/me', {
+      headers: { 'Authorization': `Bearer ${accessToken}`}
+    })
+    .then(response => response.json())
+    .then(data => this.setState({
+      serverData: {
+        user: {
+          name: data.display_name,
+          playlists: []
+        },
+      }
+    }))
   }
 
   render() {
@@ -83,7 +92,7 @@ class App extends Component {
                 filteredPlaylists.map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
               }
             </div>
-          ) : <h1 style={defaultStyle}>Loading...</h1>
+          ) : <button onClick={() => window.location='http://localhost:8888/login'} style={{padding: '20px', 'fontSize': '50px', 'marginTop': '20px'}}>Sign in with spotify</button>
         }
       </div>
     );
