@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import fakeServerData from './fakeServerData';
+// import fakeServerData from './fakeServerData';
 
 const defaultTextColor = '#fff';
 let defaultStyle = {
