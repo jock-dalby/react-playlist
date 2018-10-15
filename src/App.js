@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-// import fakeServerData from './fakeServerData';
+import fakeServerData from './fakeServerData';
 
 const defaultTextColor = '#fff';
 let defaultStyle = {
@@ -51,7 +51,7 @@ class App extends Component {
     setTimeout(() => {
       this.setState({
         serverData: fakeServerData,
-        filterString: 'favourittes'
+        filterString: ''
       })
     }, 1000)
   }
