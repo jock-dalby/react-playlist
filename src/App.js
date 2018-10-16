@@ -35,23 +35,20 @@ class PlaylistItem extends Component {
       <div style={{ ...defaultStyle, display: 'inline-block', width: '25%' }}>
         <img />
         <h3>{this.props.playlist.name}</h3>
+        <img src={this.props.playlist.image}/>
         <ul>
-          {/* {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)} */}
+          {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)}
         </ul>
       </div>
     );
   }
 }
 
+// At 35:02 on video
+
 class App extends Component {
 
   state = {
-    serverData: {
-      user: {
-        name: '',
-        playlists: []
-      }
-    },
     filterString: ''
   };
 
@@ -64,13 +61,9 @@ class App extends Component {
     })
     .then(response => response.json())
     .then(data => this.setState({
-      serverData: {
-        ...this.state.serverData,
-        user: {
-          ...this.state.serverData.user,
-          name: data.display_name,
-        },
-      }
+      user: {
+        name: data.display_name,
+      },
     }))
 
     fetch('https://api.spotify.com/v1/me/playlists', {
@@ -78,40 +71,57 @@ class App extends Component {
     })
     .then(response => response.json())
     .then(data => this.setState({
-      serverData: {
-        ...this.state.serverData,
-        user: {
-          ...this.state.serverData.user,
-          playlists: data.items,
-        },
-      }
+      playlists: data.items.map(item => {
+        console.log(item)
+        return {
+          name: item.name,
+          songs: [
+            {
+              name: 'Song a',
+              duration: 326
+            },
+            {
+              name: 'Song b',
+              duration: 295
+            },
+            {
+              name: 'Song c',
+              duration: 188
+            },
+            {
+              name: 'Song d',
+              duration: 222
+            }
+          ],
+          image: item.images.length > 0 ? item.images[0].url : null
+        }
+      })
     }))
-    setTimeout(() => {
-      console.log(this.state)
-    }, 100)
   }
 
   render() {
 
-    const serverData = this.state.serverData;
-    console.log('dddd', this.state.serverData.user.playlists)
-    const filteredPlaylists = this.state.serverData.user.playlists.filter(playlist => {
-      return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
-    });
-
-    const totalDurationInSeconds = filteredPlaylists.reduce((totalTime, playlist) => {
-      // playlist.songs.forEach(song => totalTime += song.duration);
-      return totalTime
-    }, 0)
-
-    const totalDurationInHours = Math.round(totalDurationInSeconds / 360);
+    let filteredPlaylists;
+    let totalDurationInHours;
+    if(this.state.playlists) {
+      filteredPlaylists = this.state.playlists.filter(playlist => {
+        return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
+      });
+  
+      const totalDurationInSeconds = filteredPlaylists.reduce((totalTime, playlist) => {
+        playlist.songs.forEach(song => totalTime += song.duration);
+        return totalTime
+      }, 0)
+  
+      totalDurationInHours = Math.round(totalDurationInSeconds / 360);
+    }
 
     return (
       <div className="App">
         {
-          serverData ? (
+          filteredPlaylists ? (
             <div>
-              <h1 style={defaultStyle}>{serverData.user.name}'s Playlists</h1>
+              <h1 style={defaultStyle}>{this.state.user.name}'s Playlists</h1>
               <Aggregate count={filteredPlaylists.length} type="playlists"></Aggregate>
               <Aggregate count={totalDurationInHours} type="hours"></Aggregate>
               <Filter filterString={this.state.filterString} onChangeHandler={filterString => this.setState({filterString})}/>
