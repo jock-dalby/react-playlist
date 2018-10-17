@@ -134,7 +134,9 @@ class App extends Component {
                 filteredPlaylists.map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
               }
             </div>
-          ) : <button onClick={() => window.location='http://localhost:8888/login'} style={{padding: '20px', 'fontSize': '50px', 'marginTop': '20px'}}>Sign in with spotify</button>
+          ) : <button onClick={() => {
+            window.location = window.location.includes('localhost') ? 'http://localhost:8888/login' : 'https://react-playlist-456.herokuapp.com/login'
+          }} style={{padding: '20px', 'fontSize': '50px', 'marginTop': '20px'}}>Sign in with spotify</button>
         }
       </div>
     );
