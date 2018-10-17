@@ -35,7 +35,7 @@ class PlaylistItem extends Component {
       <div style={{ ...defaultStyle, display: 'inline-block', width: '25%' }}>
         <img />
         <h3>{this.props.playlist.name}</h3>
-        <img src={this.props.playlist.image}/>
+        <img src={this.props.playlist.image} style={{width: '60px'}}/>
         <ul>
           {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)}
         </ul>
@@ -70,33 +70,38 @@ class App extends Component {
       headers: { 'Authorization': `Bearer ${accessToken}`}
     })
     .then(response => response.json())
-    .then(data => this.setState({
-      playlists: data.items.map(item => {
-        console.log(item)
-        return {
-          name: item.name,
-          songs: [
-            {
-              name: 'Song a',
-              duration: 326
-            },
-            {
-              name: 'Song b',
-              duration: 295
-            },
-            {
-              name: 'Song c',
-              duration: 188
-            },
-            {
-              name: 'Song d',
-              duration: 222
-            }
-          ],
-          image: item.images.length > 0 ? item.images[0].url : null
-        }
+    .then(data => {
+      if (!data.items){
+        return
+      }
+
+      this.setState({
+        playlists: data.items
+          .filter(item => item.images.length > 0)
+          .map(item => ({
+            name: item.name,
+            songs: [
+              {
+                name: 'Song a',
+                duration: 326
+              },
+              {
+                name: 'Song b',
+                duration: 295
+              },
+              {
+                name: 'Song c',
+                duration: 188
+              },
+              {
+                name: 'Song d',
+                duration: 222
+              }
+            ],
+            image: item.images[0].url
+        }))
       })
-    }))
+    })
   }
 
   render() {
