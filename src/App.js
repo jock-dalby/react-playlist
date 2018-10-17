@@ -37,7 +37,7 @@ class PlaylistItem extends Component {
         <h3>{this.props.playlist.name}</h3>
         <img src={this.props.playlist.image} style={{width: '60px'}}/>
         <ul>
-          {this.props.playlist.songs.map((song, i) => <li key={i}>{song.name}</li>)}
+          {this.props.playlist.tracks.map((track, i) => <li key={i}>{track.name}</li>)}
         </ul>
       </div>
     );
@@ -93,12 +93,12 @@ class App extends Component {
                 duration: trackData.duration_ms / 1000
               }))
           })
+          console.log(playlists)
           return playlists
         })
       return playlistPromise
     })
     .then(playlists => {
-      console.log(playlists)
       if (!playlists){
         return
       }
@@ -108,11 +108,15 @@ class App extends Component {
           .filter(item => item.images.length > 0)
           .map(item => ({
             name: item.name,
-            songs: item.trackDatas.slice(0, 3),
+            tracks: item.trackDatas.slice(0, 3),
             image: item.images[0].url
         }))
       })
     })
+  }
+
+  filterStringMatch(str) {
+    return str.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
   }
 
   render() {
@@ -121,11 +125,13 @@ class App extends Component {
     let totalDurationInHours;
     if(this.state.playlists) {
       filteredPlaylists = this.state.playlists.filter(playlist => {
-        return playlist.name.toLowerCase().includes(this.state.filterString.toLowerCase().trim())
+        const filterStringInPlaylistName = this.filterStringMatch(playlist.name);
+        const filterStringInATrackName = playlist.tracks.some(track => this.filterStringMatch(track.name));
+        return filterStringInPlaylistName || filterStringInATrackName;
       });
   
       const totalDurationInSeconds = filteredPlaylists.reduce((totalTime, playlist) => {
-        playlist.songs.forEach(song => totalTime += song.duration);
+        playlist.tracks.forEach(track => totalTime += track.duration);
         return totalTime
       }, 0)
   
