@@ -70,34 +70,45 @@ class App extends Component {
       headers: { 'Authorization': `Bearer ${accessToken}`}
     })
     .then(response => response.json())
-    .then(data => {
-      if (!data.items){
+    .then(playlistData => {
+      const playlists = playlistData.items
+      const trackDataPromises = playlists.map(playlist => {
+        const responsePromise = fetch(playlist.tracks.href, {
+          headers: { 'Authorization': `Bearer ${accessToken}`}
+        })
+        const trackDataPromise = responsePromise
+          .then(response => response.json())
+        return trackDataPromise
+      })
+
+      const allTrackDataPromises = Promise.all(trackDataPromises);
+
+      const playlistPromise = allTrackDataPromises
+        .then(trackDatas => {
+          playlists.forEach((playlist, i) => {
+            playlist.trackDatas = trackDatas[i].items
+              .map(item => item.track)
+              .map(trackData => ({
+                name: trackData.name,
+                duration: trackData.duration_ms / 1000
+              }))
+          })
+          return playlists
+        })
+      return playlistPromise
+    })
+    .then(playlists => {
+      console.log(playlists)
+      if (!playlists){
         return
       }
 
       this.setState({
-        playlists: data.items
+        playlists: playlists
           .filter(item => item.images.length > 0)
           .map(item => ({
             name: item.name,
-            songs: [
-              {
-                name: 'Song a',
-                duration: 326
-              },
-              {
-                name: 'Song b',
-                duration: 295
-              },
-              {
-                name: 'Song c',
-                duration: 188
-              },
-              {
-                name: 'Song d',
-                duration: 222
-              }
-            ],
+            songs: item.trackDatas.slice(0, 3),
             image: item.images[0].url
         }))
       })
