@@ -1,17 +1,29 @@
 import React, { Component } from 'react';
+import 'reset-css/reset.css';
 import './App.css';
 
 import queryString from 'query-string';
 
-const defaultTextColor = '#fff';
 let defaultStyle = {
-  color: defaultTextColor,
+  color: '#fff',
+  fontFamily: 'Papyrus'
 }
 
 class Aggregate extends Component {
   render() {
+    const countIsZero = this.props.count === 0;
+    const aggStyle = {
+      ...defaultStyle,
+      width: '40%',
+      display: 'inline-block',
+      'margin-bottom': '10px',
+      'line-height': '30px',
+      color:  countIsZero ? 'red' : defaultStyle.color,
+      'font-weight': countIsZero ? 'bold' : 'normal',
+      'font-size': '14px',
+    }
     return (
-      <div style={{ ...defaultStyle, width: '40%', display: 'inline-block' }}>
+      <div style={aggStyle}>
         <h2>{this.props.count} {this.props.type}</h2>
       </div>
     )
@@ -22,8 +34,11 @@ class Filter extends Component {
   render() {
     return (
       <div>
-        <img />
-        <input type="text" value={this.props.filterString} onChange={e => this.props.onChangeHandler(e.target.value)}/>
+        <p style={defaultStyle}>Search by playlist or track name:</p>
+        <input type="text"
+          value={this.props.filterString}
+          style={{'font-family': defaultStyle.fontFamily, 'font-size': '20px', padding: '10px', 'margin-bottom': '20px'}}
+          onChange={e => this.props.onChangeHandler(e.target.value)}/>
       </div>
     );
   }
@@ -32,12 +47,22 @@ class Filter extends Component {
 class PlaylistItem extends Component {
   render() {
     return (
-      <div style={{ ...defaultStyle, display: 'inline-block', width: '25%' }}>
-        <img />
-        <h3>{this.props.playlist.name}</h3>
+      <div style={{
+        // ...defaultStyle,
+        display: 'inline-block',
+        border: '1px solid white',
+        width: '30%',
+        height: '200px',
+        'vertical-align': 'top',
+        'padding': '10px',
+        background: this.props.index % 2 ? '#C0C0C0' : 'gray'
+        }}>
+        <p style={{'font-size': '26px'}}>{this.props.playlist.name}</p>
         <img src={this.props.playlist.image} style={{width: '60px'}}/>
-        <ul>
-          {this.props.playlist.tracks.map((track, i) => <li key={i}>{track.name}</li>)}
+        <ul style={{'margin-top': '10px', 'font-weight': 'bold'}}>
+          {this.props.playlist.tracks.map((track, i) => <li key={i} style={{'margin-top': '2px', 'font-size': '20px'}}>
+            {track.name}
+          </li>)}
         </ul>
       </div>
     );
@@ -72,6 +97,9 @@ class App extends Component {
     .then(response => response.json())
     .then(playlistData => {
       const playlists = playlistData.items
+      if(!playlists) {
+        return
+      }
       const trackDataPromises = playlists.map(playlist => {
         const responsePromise = fetch(playlist.tracks.href, {
           headers: { 'Authorization': `Bearer ${accessToken}`}
@@ -143,12 +171,14 @@ class App extends Component {
         {
           filteredPlaylists ? (
             <div>
-              <h1 style={defaultStyle}>{this.state.user.name}'s Playlists</h1>
+              <h1 style={{...defaultStyle, 'font-size': '54px', 'margin-top': '5px'}}>
+                {this.state.user.name}'s Playlists
+              </h1>
               <Aggregate count={filteredPlaylists.length} type="playlists"></Aggregate>
               <Aggregate count={totalDurationInHours} type="hours"></Aggregate>
               <Filter filterString={this.state.filterString} onChangeHandler={filterString => this.setState({filterString})}/>
               {
-                filteredPlaylists.map((playlist, i) => <PlaylistItem playlist={playlist} key={i}/>)
+                filteredPlaylists.map((playlist, i) => <PlaylistItem playlist={playlist} index={i} key={i}/>)
               }
             </div>
           ) : <button onClick={() => {
